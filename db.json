@@ -1,0 +1,268 @@
+{
+  "posts": [
+    {
+      "id": "1",
+      "date": "Jun/2024",
+      "overallCash": 1000,
+      "expense": 200,
+      "income": 1200
+    },
+    {
+      "id": "1",
+      "date": "Jul/2024",
+      "overallCash": 900,
+      "expense": 150,
+      "income": 1050
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "label": "Food",
+      "icon": "IoFastFoodOutline",
+      "date": "Jun/2024"
+    },
+    {
+      "id": "2",
+      "label": "Cafe",
+      "icon": "IoCafeOutline",
+      "date": "Jun/2024"
+    },
+    {
+      "id": "3",
+      "label": "Entertainment",
+      "icon": "IoTvOutline",
+      "date": "Jun/2024"
+    },
+    {
+      "id": "4",
+      "label": "Transport",
+      "icon": "IoCarOutline",
+      "date": "Jun/2024"
+    },
+    {
+      "id": "5",
+      "label": "Health",
+      "icon": "IoHeartOutline",
+      "date": "Jun/2024"
+    },
+    {
+      "id": "6",
+      "label": "Clothes",
+      "icon": "IoShirtOutline",
+      "date": "Jun/2024"
+    },
+    {
+      "id": "7",
+      "label": "Tax",
+      "icon": "BsCashCoin",
+      "date": "Jun/2024"
+    },
+    {
+      "id": "8",
+      "label": "Food",
+      "icon": "IoFastFoodOutline",
+      "date": "Jul/2024"
+    },
+    {
+      "id": "9",
+      "label": "Cafe",
+      "icon": "IoCafeOutline",
+      "date": "Jul/2024"
+    },
+    {
+      "id": "10",
+      "label": "Entertainment",
+      "icon": "IoTvOutline",
+      "date": "Jul/2024"
+    },
+    {
+      "id": "11",
+      "label": "Transport",
+      "icon": "IoCarOutline",
+      "date": "Jul/2024"
+    },
+    {
+      "id": "12",
+      "label": "Health",
+      "icon": "IoHeartOutline",
+      "date": "Jul/2024"
+    },
+    {
+      "id": "13",
+      "label": "Clothes",
+      "icon": "IoShirtOutline",
+      "date": "Jul/2024"
+    }
+  ],
+  "history": [
+    {
+      "id": "4",
+      "title": "sushi",
+      "date": "28/Jun/2024",
+      "categoryId": 1,
+      "postId": 1,
+      "amount": 30
+    },
+    {
+      "id": "5",
+      "title": "ice cream",
+      "date": "29/Jun/2024",
+      "categoryId": 1,
+      "postId": 1,
+      "amount": 50
+    },
+    {
+      "id": "6",
+      "title": "salad",
+      "date": "30/Jun/2024",
+      "categoryId": 1,
+      "postId": 1,
+      "amount": 40
+    },
+    {
+      "id": "7",
+      "title": "latte",
+      "date": "26/Jun/2024",
+      "categoryId": 2,
+      "postId": 1,
+      "amount": 10
+    },
+    {
+      "id": "8",
+      "title": "cappuccino",
+      "date": "27/Jun/2024",
+      "categoryId": 2,
+      "postId": 1,
+      "amount": 15
+    },
+    {
+      "id": "9",
+      "title": "mocha",
+      "date": "28/Jun/2024",
+      "categoryId": 2,
+      "postId": 1,
+      "amount": 25
+    },
+    {
+      "id": "10",
+      "title": "movie ticket",
+      "date": "26/Jun/2024",
+      "categoryId": 3,
+      "postId": 1,
+      "amount": 20
+    },
+    {
+      "id": "11",
+      "title": "concert ticket",
+      "date": "27/Jun/2024",
+      "categoryId": 3,
+      "postId": 1,
+      "amount": 20
+    },
+    {
+      "id": "12",
+      "title": "amusement park",
+      "date": "28/Jun/2024",
+      "categoryId": 3,
+      "postId": 1,
+      "amount": 40
+    },
+    {
+      "id": "13",
+      "title": "taxi ride",
+      "date": "26/Jun/2024",
+      "categoryId": 4,
+      "postId": 1,
+      "amount": 10
+    },
+    {
+      "id": "14",
+      "title": "bus fare",
+      "date": "27/Jun/2024",
+      "categoryId": 4,
+      "postId": 1,
+      "amount": 15
+    },
+    {
+      "id": "15",
+      "title": "train ticket",
+      "date": "28/Jun/2024",
+      "categoryId": 4,
+      "postId": 1,
+      "amount": 35
+    },
+    {
+      "id": "16",
+      "title": "gym membership",
+      "date": "26/Jun/2024",
+      "categoryId": 5,
+      "postId": 1,
+      "amount": 20
+    },
+    {
+      "id": "17",
+      "title": "doctor visit",
+      "date": "27/Jun/2024",
+      "categoryId": 5,
+      "postId": 1,
+      "amount": 30
+    },
+    {
+      "id": "18",
+      "title": "medication",
+      "date": "28/Jun/2024",
+      "categoryId": 5,
+      "postId": 1,
+      "amount": 40
+    },
+    {
+      "id": "19",
+      "title": "t-shirt",
+      "date": "26/Jun/2024",
+      "categoryId": 6,
+      "postId": 1,
+      "amount": 10
+    },
+    {
+      "id": "20",
+      "title": "jeans",
+      "date": "27/Jun/2024",
+      "categoryId": 6,
+      "postId": 1,
+      "amount": 20
+    },
+    {
+      "id": "21",
+      "title": "shoes",
+      "date": "28/Jun/2024",
+      "categoryId": 6,
+      "postId": 1,
+      "amount": 40
+    },
+    {
+      "id": "22",
+      "title": "property tax",
+      "date": "26/Jun/2024",
+      "categoryId": 7,
+      "postId": 1,
+      "amount": 30
+    },
+    {
+      "id": "23",
+      "title": "income tax",
+      "date": "27/Jun/2024",
+      "categoryId": 7,
+      "postId": 1,
+      "amount": 20
+    },
+    {
+      "id": "24",
+      "title": "sales tax",
+      "date": "28/Jun/2024",
+      "categoryId": 7,
+      "postId": 1,
+      "amount": 50
+    }
+  ]
+}

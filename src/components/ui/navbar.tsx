@@ -5,20 +5,21 @@ import { useState } from 'react';
 import { MenuOutlined } from '@ant-design/icons';
 
 
-const Navbar = () => {
+const Navbar = ({ balance }: { balance: number | undefined }) => {
     const [open, setOpen] = useState(false);
 
     const showDrawer = () => {
         setOpen(true);
     };
 
-
     const onClose = () => {
         setOpen(false);
     };
+
+
     return (
         <nav className="p-4">
-            <div className="container mx-auto flex justify-between items-center">
+            <div className="mb-6 container mx-auto flex justify-between items-center">
                 <div className="text-lg font-bold">
                     <Link href="/">
                         <p>Cash Tracker</p>
@@ -37,7 +38,7 @@ const Navbar = () => {
             </div>
             <div className='container mx-auto flex flex-col justify-center items-center'>
                 <h3>Overall balance</h3>
-                <h1 className='text-4xl'>$ 9</h1>
+                <h1 className='text-4xl'>${balance || 0}</h1>
             </div>
         </nav>
     );

@@ -1,4 +1,5 @@
 
+import { IconMapProps } from '@/app/interfaces/data';
 import React from 'react';
 import { BsCashCoin } from 'react-icons/bs';
 import { FaScrewdriverWrench } from 'react-icons/fa6';

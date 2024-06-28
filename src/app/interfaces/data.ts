@@ -10,11 +10,11 @@ export interface PostProps {
     income: number;
 } 
 export interface CategoryProps {
-    id: string;
+    id?: string |number;
     label: string;
     icon: keyof IconMapProps; // Assuming iconMap is defined similarly in your code
-   
-    date: string;
+    date?: string;
+    amount?:number;
 } 
 export interface HistoryProps {
     id: string;

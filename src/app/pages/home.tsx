@@ -1,89 +1,180 @@
-'use client';
-
-import { Button, Card, DatePicker, DatePickerProps, Drawer, Modal } from 'antd';
-import { IoAdd } from 'react-icons/io5';
-import Navbar from '../../components/ui/navbar';
-import { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
+'use client'
+import CategoryDetailDrawer from '@/components/ui/categoryDetailDrawer';
+import CategoryDetailModal from '@/components/ui/categoryDetailModal';
+import { CategoryList } from '@/components/ui/categoryList';
+import { Button, Card, DatePicker, DatePickerProps, Modal } from 'antd';
 import axios from 'axios';
-import iconMap from '@/components/ui/icon';
+import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
+import { IoAdd } from 'react-icons/io5';
 import { useMediaQuery } from 'react-responsive';
+import Navbar from '../../components/ui/navbar';
 import { CategoryProps, HistoryProps, PostProps } from '../interfaces/data';
-import { CloseOutlined } from '@ant-design/icons';
+import CashFlow from '@/components/ui/cashFlow';
+
+// ENV
+const postsEndpoint = process.env.NEXT_PUBLIC_POSTS_ENDPOINT;
+const categoriesEndpoint = process.env.NEXT_PUBLIC_CATEGORIES_ENDPOINT;
+const historyEndpoint = process.env.NEXT_PUBLIC_HISTORY_ENDPOINT;
 
 const Home = () => {
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-    const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
-    const [selectedMonth, setSelectedMonth] = useState(dayjs().format('MMM/YYYY'));
-    const [selectedCategory, setSelectedCategory] = useState<CategoryProps | null>(null);
-    const [historyDetail, setHistoryDetail] = useState<HistoryProps[] | null>(null);
-    const [post, setPost] = useState<PostProps | null>(null);
-    const [category, setCategory] = useState<CategoryProps[] | null>(null);
-    const [history, setHistory] = useState<HistoryProps[] | null>(null);
 
+    // keep drawer and modal state in parent 
+    // reasons
+    // 1. trigger button in the parent
+    // 2. gotta pass selected info from parent anyway
+
+    // popups state group
+    const [openCategoryDetail, setOpenCategoryDetail] = useState(false);
+    const [openCategoryDetailDrawer, setOpenCategoryDetailDrawer] = useState(false);
+    const [isNewCategoryModalOpen, setIsNewCategoryModalOpen] = useState(false);
+
+    // information state group 
+    const [post, setPost] = useState<PostProps>();
+    const [category, setCategory] = useState<CategoryProps[]>([]);
+    const [history, setHistory] = useState<HistoryProps[]>([]);
+    const [historyDetail, setHistoryDetail] = useState<HistoryProps[]>([]);
+    const [expense, setExpense] = useState<number>(0); // State to hold expense
+
+    // dynamic
+    const [selectedMonth, setSelectedMonth] = useState(dayjs().format('MMM/YYYY'));
+    const [selectedCategory, setSelectedCategory] = useState<CategoryProps>();
+
+    // sm screen use drawer
+    // md screen use modal
     const isMdUp = useMediaQuery({ query: '(min-width: 768px)' });
 
-    const fetchData = async () => {
-        try {
-            const responsePost = await axios.get(`http://localhost:4000/posts?date=${selectedMonth}`);
-            const responseCategory = await axios.get(`http://localhost:4000/categories?date=${selectedMonth}`);
-            const responseHistory = await axios.get(`http://localhost:4000/history?date_like=${selectedMonth}`);
-
-            setCategory(responseCategory.data);
-            setPost(responsePost.data[0]); // Assuming response is an array and you need the first item
-            setHistory(responseHistory.data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const responsePost = await axios.get(`${postsEndpoint}?date=${selectedMonth}`);
+                const responseCategory = await axios.get(`${categoriesEndpoint}?date=${selectedMonth}`);
+                const responseHistory = await axios.get(`${historyEndpoint}?date_like=${selectedMonth}`);
+
+                const fetchedCategories = responseCategory.data;
+                const fetchedHistory = responseHistory.data;
+
+                const mergedCategories = mergeWithDefaultCategories(fetchedCategories, fetchedHistory);
+
+                setCategory(mergedCategories);
+                setPost(responsePost.data[0]);
+                setHistory(fetchedHistory);
+
+                // Calculate total expense from category amounts
+                const totalExpense = calculateTotalExpense(mergedCategories);
+                setExpense(totalExpense);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
         fetchData();
     }, [selectedMonth]);
 
-    const onChange: DatePickerProps['onChange'] = (date) => {
+
+    const mergeWithDefaultCategories = (fetchedCategories: CategoryProps[], fetchedHistory: HistoryProps[]) => {
+
+        const defaultCategory = [
+            { id: "900000", label: "Food", icon: "IoFastFoodOutline", amount: 0 },
+            { id: "900001", label: "Cafe", icon: "IoCafeOutline", amount: 0 },
+            { id: "900002", label: "Entertainment", icon: "IoTvOutline", amount: 0 },
+            { id: "900003", label: "Transport", icon: "IoCarOutline", amount: 0 },
+            { id: "900004", label: "Health", icon: "IoHeartOutline", amount: 0 },
+            { id: "900005", label: "Clothes", icon: "IoShirtOutline", amount: 0 },
+            { id: "900006", label: "Tax", icon: "BsCashCoin", amount: 0 }
+        ];
+
+        const totalCashPerCategory = fetchedHistory.reduce((acc: { [key: string]: number }, item: HistoryProps) => {
+            console.log("acc", acc);
+            console.log("item", item);
+            const categoryId = item.categoryId;
+            if (!acc[categoryId]) {
+                acc[categoryId] = 0;
+            }
+            acc[categoryId] += item.amount;
+            return acc;
+        }, {} as { [key: string]: number });
+
+
+        const fetchedCategoryMap = fetchedCategories.reduce((acc: { [key: string]: CategoryProps }, category: CategoryProps) => {
+            // acc stands for accumulator
+            acc[category.label] = category;
+            return acc;
+        }, {} as { [key: string]: CategoryProps });
+
+        return defaultCategory.map((defaultCat: CategoryProps) => {
+            const fetchedCat = fetchedCategoryMap[defaultCat.label];
+
+            if (fetchedCat) {
+                fetchedCat.amount = totalCashPerCategory[fetchedCat.id as keyof typeof totalCashPerCategory] || 0;
+                return fetchedCat;
+            } else {
+                defaultCat.amount = 0;
+                return defaultCat;
+            }
+        });
+
+    };
+
+    // derive info from category
+    const calculateTotalExpense = (categories: CategoryProps[]) => {
+        if (!categories) return 0;
+        return categories.reduce((total, cat) => total + (cat.amount || 0), 0);
+    };
+
+
+    const onChangeMonth: DatePickerProps['onChange'] = (date) => {
         setSelectedMonth(date ? date.format('MMM/YYYY') : dayjs().format('MMM/YYYY'));
     };
-
+    // handle the category detail popup
     const showCategory = (category: CategoryProps) => {
-        const filteredHistory = history?.filter(item => parseInt(item.categoryId) === parseInt(category.id)) || [];
+        const filteredHistory = history?.filter(item => parseInt(item.categoryId) === parseInt(category.id as string)) || [];
+
         setHistoryDetail(filteredHistory);
         setSelectedCategory(category);
-
         if (isMdUp) {
-            setIsCategoryModalOpen(true);
+            setOpenCategoryDetail(true);
         } else {
-            setIsCategoryDrawerOpen(true);
+            setOpenCategoryDetailDrawer(true);
         }
     };
-    console.log(historyDetail)
-    const handleOk = () => setIsCategoryModalOpen(false);
-    const handleCancel = () => setIsCategoryModalOpen(false);
-    const handleClose = () => setIsCategoryDrawerOpen(false);
 
+    const handleOk = () => setOpenCategoryDetail(false);
+    const handleCancelCategoryDetail = () => setOpenCategoryDetail(false);
+    const handleClose = () => setOpenCategoryDetailDrawer(false);
+
+    const confirmDeleteHistoryItem = (id: number) => {
+        Modal.confirm({
+            title: 'Are you sure you want to delete this item?',
+            onOk: () => deleteHistoryItem(id),
+        });
+    };
+
+    // too much hassle to move to child component
     const deleteHistoryItem = async (id: number) => {
         try {
-            // Send DELETE request to remove item from server
-            await axios.delete(`http://localhost:4000/history/${id}`);
-            const updateHistoryDetail = historyDetail?.filter(item => item.id !== id.toString())
-            setHistoryDetail(updateHistoryDetail);
-            // if (selectedCategory) {
-            //     showCategory(selectedCategory);
-            // }
+            await axios.delete(`${historyEndpoint}${id}`);
+
+            // Filter historyDetail and history to remove the deleted item
+            const updatedHistoryDetail = historyDetail?.filter(item => item.id !== id.toString()) || [];
+            const updatedHistory = history?.filter(item => item.id !== id.toString()) || [];
+
+            // Update state variables with filtered data
+            setHistoryDetail(updatedHistoryDetail);
+            setHistory(updatedHistory);
+
+            // Update category and expense calculations based on updated history
+            const updatedCategory = mergeWithDefaultCategories(category, updatedHistory);
+            setCategory(updatedCategory);
+
+            // Recalculate total expense after deletion
+            const totalExpense = calculateTotalExpense(updatedCategory);
+            setExpense(totalExpense);
         } catch (error) {
             console.error('Error deleting history item:', error);
         }
     };
 
-    const groupHistoryByDate = (history: HistoryProps[] | null) => {
-        if (!history) return {};
-        return history.reduce((acc, item) => {
-            const date = item.date.split('T')[0]; // Assuming date is in ISO format
-            acc[date] = acc[date] || [];
-            acc[date].push(item);
-            return acc;
-        }, {});
-    };
+    const handleOpenAddCategoryModal = () => setIsNewCategoryModalOpen(true);
 
     return (
         <main>
@@ -91,25 +182,16 @@ const Home = () => {
             <div className="flex flex-col justify-center items-center container max-w-sm">
                 <DatePicker
                     className='mx-auto mb-4'
-                    onChange={onChange}
+                    onChange={onChangeMonth}
                     picker="month"
                     defaultValue={dayjs()}
                 />
-                <CashFlow expense={post?.expense} income={post?.income} />
+                <CashFlow expense={expense} income={post?.income} />
             </div>
             <div className='grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 container mt-4 mx-auto gap-2'>
-                {category?.map((item) => (
-                    <Card className='hover:cursor-pointer' key={item.id} onClick={() => showCategory(item)}>
-                        <div className='flex gap-x-4 items-center'>
-                            <span>{iconMap[item.icon]}</span>
-                            <div className='flex flex-col'>
-                                <span>{item.label}</span>
-                                <span className='text-xs md:text-base'>{item.amount} USD</span>
-                            </div>
-                        </div>
-                    </Card>
-                ))}
-                <Button onClick={() => alert("lol")} type="dashed" className='flex justify-start gap-x-2 items-center h-full'>
+
+                <CategoryList categories={category} showCategory={showCategory} />
+                <Button onClick={handleOpenAddCategoryModal} type="dashed" className='flex justify-start gap-x-2 items-center h-full'>
                     <IoAdd className='text-xl' />
                     <span>Add Category</span>
                 </Button>
@@ -117,80 +199,37 @@ const Home = () => {
 
             {historyDetail && selectedCategory && (
                 <>
-                    <Modal
+                    <CategoryDetailModal
+                        // modal props
                         title={selectedCategory.label}
-                        open={isCategoryModalOpen}
-                        onOk={handleOk}
-                        onCancel={handleCancel}
-                    >
-                        {Object.entries(groupHistoryByDate(historyDetail)).map(([date, items], index) => (
-                            <div key={index} >
-                                <span>{date}</span>
-                                {items.map((item, id) => (
-                                    <div className='flex items-center justify-between ml-4' key={id}>
-                                        <span>{item.title}</span>
-                                        <div className='flex gap-x-1 items-center justify-between'>
-                                            <span>{item.amount} USD</span>
-                                            <Button
-                                                size='small'
-                                                type='text'
-                                                onClick={() => deleteHistoryItem(item.id)} >
-                                                <CloseOutlined />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </Modal>
+                        isOpen={openCategoryDetail}
+                        onClose={handleCancelCategoryDetail}
+                        confirmDeleteHistoryItem={confirmDeleteHistoryItem}
+                        // content props
+                        historyDetail={historyDetail}
+                    />
 
-                    <Drawer
+                    <CategoryDetailDrawer
+                        // drawer props
                         title={selectedCategory.label}
-                        placement="bottom"
+                        isOpen={openCategoryDetailDrawer}
                         onClose={handleClose}
-                        open={isCategoryDrawerOpen}
-                    >
-                        {Object.entries(groupHistoryByDate(historyDetail)).map(([date, items], index) => (
-                            <div key={index} >
-                                <span>{date}</span>
-                                {items.map((item, id) => (
-                                    <div className='flex items-center justify-between ml-4' key={id}>
-                                        <span>{item.title}</span>
-                                        <div className='flex gap-x-1 items-center justify-between'>
-                                            <span>{item.amount} USD</span>
-                                            <Button
-                                                size='small'
-                                                type='text'
-                                                onClick={() => deleteHistoryItem(item.id)}
-                                            >
-                                                <CloseOutlined />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </Drawer>
+                        confirmDeleteHistoryItem={confirmDeleteHistoryItem}
+                        // content props
+                        historyDetail={historyDetail}
+                    />
                 </>
             )}
+
+            {/* <AddCategoryModal
+                open={isNewCategoryModalOpen}
+                onOk={handleNewCategoryModalOk}
+                onCancel={handleNewCategoryModalCancel}
+            /> */}
         </main>
     );
 };
 
-function CashFlow({ expense, income }: { expense: number | undefined, income: number | undefined }) {
-    return (
-        <div className="flex justify-between w-full gap-x-2">
-            <Card size='small' className="border-2 text-center border-red-500 w-1/2">
-                <h1>Expense</h1>
-                <h1>${expense || 0}</h1>
-            </Card>
 
-            <Card size='small' className="border-2 text-center border-green-500 w-1/2">
-                <h1>Income</h1>
-                <h1>${income || 0}</h1>
-            </Card>
-        </div>
-    );
-}
 
 export default Home;
